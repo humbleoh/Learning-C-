@@ -5,6 +5,8 @@ using namespace std;
 
 void throw_nothing()
 {
+    // If no exception is presently being handled, executing a throw expression
+    // with no operand calls std::terminate(.)
     throw;
 }
 
