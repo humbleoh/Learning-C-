@@ -28,6 +28,38 @@ public:
     }
 };
 
+class test_class2 {
+public:
+    test_class2()
+    {
+        cout << __PRETTY_FUNCTION__ << endl;
+    }
+    test_class2(const test_class2 &)
+    {
+        cout << __PRETTY_FUNCTION__ << endl;
+    }
+    ~test_class2()
+    {
+        cout << __PRETTY_FUNCTION__ << endl;
+    }
+	// https://en.cppreference.com/w/cpp/language/move_constructor
+    // Why move constructor is not implicitly declared for this class?
+    // If no user-defined constructors are provided for a classs type, and all of
+    // the following is true:
+    // - there are no user-declared copy constructors;
+    // - there are no user-declared copy assignment operators;
+    // - there are no user-declared move assignment operators;
+    // - there are no user-declared destructors;
+    // then the compiler will declare a move constructor as a non-implicit inline
+    // public member of its class with the signator T::T(T &&).
+
+    //// If there are user-declared copy constructor/assignment operator, it implies
+    //// that the object cannot be constructed trivially, which in turn implying
+    //// that the object cannot be moved trivially also. And thus the compiler
+    //// should not generate implicitly declared move constructor, given that
+    //// the object cannot be trivially constructed.
+};
+
 test_class test_func1()
 {
     cout << __PRETTY_FUNCTION__ << endl;
@@ -54,10 +86,59 @@ test_class test_func2()
     return obj;
 }
 
+test_class2 test_func3()
+{
+    cout << __PRETTY_FUNCTION__ << endl;
+    return test_class2 {};
+}
+
+test_class2 test_func4()
+{
+    cout << __PRETTY_FUNCTION__ << endl;
+    test_class2 obj;
+    return obj;
+}
+
 int main(int argc, const char *argv[])
 {
-    test_func1();
-    test_func2();
+    test_class t1 = test_func1();  // move
+    test_class t2 = test_func2();  // move
+    test_class2 t3 = test_func3(); // copy
+    test_class2 t4 = test_func4(); // copy
+
+    //// Given the output below, there are two constructions happen
+    //// 1. return statement -> temp variable.
+    //// 2. temp variable -> named variable to be constructed.
+#if 0
+    test_class test_func1()
+    test_class::test_class()
+    test_class::test_class(test_class&&)
+    test_class::~test_class()
+    test_class::test_class(test_class&&)
+    test_class::~test_class()
+    test_class test_func2()
+    test_class::test_class()
+    test_class::test_class(test_class&&)
+    test_class::~test_class()
+    test_class::test_class(test_class&&)
+    test_class::~test_class()
+    test_class2 test_func3()
+    test_class2::test_class2()
+    test_class2::test_class2(const test_class2&)
+    test_class2::~test_class2()
+    test_class2::test_class2(const test_class2&)
+    test_class2::~test_class2()
+    test_class2 test_func4()
+    test_class2::test_class2()
+    test_class2::test_class2(const test_class2&)
+    test_class2::~test_class2()
+    test_class2::test_class2(const test_class2&)
+    test_class2::~test_class2()
+    test_class2::~test_class2()
+    test_class2::~test_class2()
+    test_class::~test_class()
+    test_class::~test_class()
+#endif
     return 0;
 }
 
