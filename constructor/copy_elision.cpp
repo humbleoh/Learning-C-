@@ -71,6 +71,8 @@ test_class test_func1()
     // target object. When the nameless temporary is the operand of a return
     // statement, this variant of copy elision is known as RVO, "return value
     // optimization". (since c++17)
+
+    // copy elision can be applied even if copying/moving the object has side-effects.
     return test_class{}; // prvalue, so move constructor is selected.
 }
 
